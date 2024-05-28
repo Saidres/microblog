@@ -1,0 +1,37 @@
+version: "3.8"
+services:
+  db:
+    image: mysql:8.0
+    container_name: local_mysql
+    restart: always
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: microblog
+    volumes:
+      - ./local_mysql_data:/var/lib/mysql
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python manage.py runserver 0.0.0.0:8080
+    volumes:
+      - .:/microblog
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  nginx:
+    build:
+      context: .
+      dockerfile: dockerfile.nginx
+    ports:
+      - "8080:8080"
+    depends_on:
+      - web
+
+volumes:
+  db_data:
